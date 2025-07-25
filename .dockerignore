@@ -40,6 +40,7 @@ postman_collection.json
 *.log
 logs/
 
+
 # Arquivos temporários
 *.tmp
 *.temp

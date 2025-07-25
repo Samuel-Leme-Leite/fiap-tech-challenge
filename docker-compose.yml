@@ -82,3 +82,5 @@ volumes:
 networks:
   tech_challenge_network:
     driver: bridge
+
+
