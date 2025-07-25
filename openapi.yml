@@ -1,0 +1,770 @@
+openapi: 3.0.4
+info:
+  title: Tech Challenge - Fase 1 - API de Usuários
+  description: >
+    API RESTful para gerenciamento de usuários de aplicação web. Fornece endpoints para
+    criação, atualização e exclusão de usuários (com campos nome, email, login, senha
+    e data da última alteração), além de validação de credenciais de login e da busca do usuário pelo id. Desenvolvida
+    em Spring Boot e containerizada via Docker Compose, a documentação inclui instruções
+    de configuração do ambiente, execução da aplicação e collections de testes em Postman.
+  version: 1.0.0
+  contact:
+    name: Samuel
+    email: samuel.lemeleite@gmail.com
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desenvolvimento
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - userName
+        - password
+      properties:
+        id:
+          type: integer
+          example: 1
+          readOnly: true
+        firstName:
+          type: string
+          example: "João"
+        lastName:
+          type: string
+          example: "Silva"
+        email:
+          type: string
+          format: email
+          example: "exemplo@exemplo.com"
+        userName:
+          type: string
+          example: "joao.silva"
+        password:
+          type: string
+          format: password
+          example: "senha123"
+          writeOnly: true
+        isActive:
+          type: boolean
+          example: true
+        lastModifiedDate:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+          readOnly: true
+
+    UserCreateRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - userName
+        - password
+      properties:
+        firstName:
+          type: string
+          example: "João"
+        lastName:
+          type: string
+          example: "Silva"
+        email:
+          type: string
+          format: email
+          example: "exemplo@exemplo.com"
+        userName:
+          type: string
+          example: "joao.silva"
+        password:
+          type: string
+          format: password
+          example: "senha123"
+
+    UserUpdateRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+      properties:
+        firstName:
+          type: string
+          example: "João"
+        lastName:
+          type: string
+          example: "Silva"
+        email:
+          type: string
+          format: email
+          example: "exemplo@exemplo.com"
+        userName:
+          type: string
+          example: "joao.silva"
+        isActive:
+          type: boolean
+          example: true
+
+    UserPasswordUpdateRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          example: "senhaAntiga123"
+        newPassword:
+          type: string
+          format: password
+          example: "novaSenha456"
+
+    UserLoginRequest:
+      type: object
+      required:
+        - userName
+        - password
+      properties:
+        userName:
+          type: string
+          example: "joao.silva"
+        password:
+          type: string
+          format: password
+          example: "senha123"
+
+    UserLoginResponse:
+      type: object
+      required:
+        - userId
+        - accessToken
+        - refreshToken
+        - expiresIn
+      properties:
+        userId:
+          type: integer
+          example: 1
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ=="
+        expiresIn:
+          type: integer
+          example: 3600
+          description: Tempo de expiração do token em segundos.
+
+    UserTokenRefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: "dGhpc2lzYXJlZnJlc2h0b2tlbg=="
+      required:
+        - refreshToken
+
+    UserAuditLog:
+      type: object
+      required:
+        - userId
+        - action
+        - timestamp
+        - ipAddress
+        - userAgent
+      properties:
+        id:
+          type: integer
+          example: 1001
+          readOnly: true
+        userId:
+          type: integer
+          example: 1
+        action:
+          type: string
+          enum: [CREATE, UPDATE, DELETE, LOGIN, PASSWORD_CHANGE]
+          example: "CREATE"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-01T12:00:00Z"
+        ipAddress:
+          type: string
+          example: "192.168.0.1"
+        userAgent:
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+        description:
+          type: string
+          example: "Usuário alterou o email de exemplo@antigo.com para exemplo@novo.com"
+
+    Error:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "INVALID_REQUEST"
+              message:
+                type: string
+                example: "A requisição contém erros. Verifique os dados fornecidos."
+            required:
+              - code
+              - message
+      required:
+        - messages
+
+paths:
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Criar um novo usuário.
+      description: Cria um novo usuário com os dados fornecidos.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateRequest"
+      responses:
+        "201":
+          description: Usuário criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: 1
+                firstName: "João"
+                lastName: "Silva"
+                email: "exemplo@email.com"
+                userName: "joao.silva"
+                isActive: true
+                lastModifiedDate: "2023-10-01T12:00:00Z"
+        "400":
+          description: Requisição inválida. Verifique os dados fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os dados fornecidos."
+        "409":
+          description: Conflito. O email ou nome de usuário já está em uso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_ALREADY_EXISTS"
+                    message: "Já existe um usuário com o email e/ou nome de usuário fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Buscar usuário pelo id.
+      description: Retorna os detalhes de um usuário específico pelo seu ID.
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser buscado.
+      responses:
+        "200":
+          description: Usuário encontrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: 1
+                firstName: "João"
+                lastName: "Silva"
+                email: "email@email.com"
+                userName: "joao.silva"
+                isActive: true
+                lastModifiedDate: "2023-10-01T12:00:00Z"
+        "400":
+          description: Requisição inválida. O ID do usuário deve ser um número válido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_USER_ID"
+                    message: "O ID do usuário deve ser um número válido."
+        "404":
+          description: Usuário não encontrado. Verifique se o ID está correto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_NOT_FOUND"
+                    message: "Usuário não encontrado com o ID fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao buscar o usuário."
+
+    put:
+      tags:
+        - Users
+      summary: Atualizar usuário pelo id.
+      description: Atualiza os dados de um usuário específico pelo seu ID.
+      operationId: updateUserById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser atualizado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+              example:
+                id: 1
+                firstName: "João"
+                lastName: "Silva"
+                email: "exemplo@exemplo.com"
+                userName: "joao.silva"
+                isActive: true
+        "400":
+          description: Requisição inválida. Verifique os dados fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os dados fornecidos."
+        "404":
+          description: Usuário não encontrado. Verifique se o ID está correto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_NOT_FOUND"
+                    message: "Usuário não encontrado com o ID fornecido."
+        "409":
+          description: Conflito. O email ou nome de usuário já está em uso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_ALREADY_EXISTS"
+                    message: "Já existe um usuário com o email e/ou nome de usuário fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao atualizar o usuário."
+
+    patch:
+      tags:
+        - Users
+      summary: Atualizar senha do usuário pelo id.
+      description: Atualiza a senha de um usuário específico pelo seu ID.
+      operationId: updateUserPasswordById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário cuja senha será atualizada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPasswordUpdateRequest"
+      responses:
+        "204":
+          description: Senha atualizada com sucesso. Não retorna conteúdo.
+        "400":
+          description: Requisição inválida. Verifique os dados fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os dados fornecidos."
+        "401":
+          description: Senha atual incorreta. Verifique a senha atual fornecida.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_CURRENT_PASSWORD"
+                    message: "A senha atual fornecida está incorreta."
+        "404":
+          description: Usuário não encontrado. Verifique se o ID está correto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_NOT_FOUND"
+                    message: "Usuário não encontrado com o ID fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao atualizar a senha do usuário."
+
+    delete:
+      tags:
+        - Users
+      summary: Excluir usuário pelo id.
+      description: Exclui um usuário específico pelo seu ID.
+      operationId: deleteUserById
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser excluído.
+      responses:
+        "204":
+          description: Usuário excluído com sucesso. Não retorna conteúdo.
+        "400":
+          description: Requisição inválida. O ID do usuário deve ser um número válido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_USER_ID"
+                    message: "O ID do usuário deve ser um número válido."
+        "404":
+          description: Usuário não encontrado. Verifique se o ID está correto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_NOT_FOUND"
+                    message: "Usuário não encontrado com o ID fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao excluir o usuário."
+
+  /users/{userId}/audit:
+    get:
+      tags:
+        - Users
+      summary: Listar logs de auditoria do usuário.
+      description: Retorna uma lista de logs de auditoria para um usuário específico.
+      operationId: listUserAuditLogs
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário cujos logs de auditoria serão retornados.
+      responses:
+        "200":
+          description: Lista de logs de auditoria retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserAuditLog"
+              example:
+                - id: 1001
+                  userId: 1
+                  action: "CREATE"
+                  timestamp: "2023-10-01T12:00:00Z"
+                  ipAddress: "192.168.0.1"
+                  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+                  description: "Usuário criado com sucesso."
+        "400":
+          description: Requisição inválida. O ID do usuário deve ser um número válido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_USER_ID"
+                    message: "O ID do usuário deve ser um número válido."
+        "404":
+          description: Usuário não encontrado. Verifique se o ID está correto.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "USER_NOT_FOUND"
+                    message: "Usuário não encontrado com o ID fornecido."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao listar os logs de auditoria do usuário."
+
+  /audit:
+    get:
+      tags:
+        - Audit
+      summary: Listar logs de auditoria.
+      description: Retorna uma lista de logs de auditoria dos usuários.
+      operationId: listAuditLogs
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID do usuário para filtrar os logs de auditoria.
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [CREATE, UPDATE, DELETE, LOGIN, PASSWORD_CHANGE]
+          description: Ação para filtrar os logs de auditoria.
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Data de início para filtrar os logs de auditoria.
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Data de fim para filtrar os logs de auditoria.
+      responses:
+        "200":
+          description: Lista de logs de auditoria retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserAuditLog"
+              example:
+                - id: 1001
+                  userId: 1
+                  action: "CREATE"
+                  timestamp: "2023-10-01T12:00:00Z"
+                  ipAddress: "192.168.0.1"
+                  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+                  description: "Usuário criado com sucesso."
+        "400":
+          description: Requisição inválida. Verifique os parâmetros fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os parâmetros fornecidos."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao listar os logs de auditoria."
+
+  /login:
+    post:
+      tags:
+        - Users
+      summary: Validar credenciais de login.
+      description: Valida as credenciais de login do usuário e retorna tokens de acesso.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequest"
+      responses:
+        "200":
+          description: Login bem-sucedido. Retorna os tokens de acesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLoginResponse"
+              example:
+                userId: 1
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ=="
+                expiresIn: 3600
+        "400":
+          description: Requisição inválida. Verifique os dados fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os dados fornecidos."
+        "401":
+          description: Credenciais inválidas. Verifique o nome de usuário e a senha.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_CREDENTIALS"
+                    message: "Nome de usuário ou senha inválidos."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao validar as credenciais de login."
+
+  /auth/refresh:
+    post:
+      tags:
+        - Users
+      summary: Atualizar token de acesso usando refresh token.
+      description: Atualiza o token de acesso usando o refresh token fornecido.
+      operationId: refreshAccessToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserTokenRefreshRequest"
+      responses:
+        "200":
+          description: Token de acesso atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLoginResponse"
+              example:
+                userId: 1
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ=="
+                expiresIn: 3600
+        "400":
+          description: Requisição inválida. Verifique os dados fornecidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REQUEST"
+                    message: "A requisição contém erros. Verifique os dados fornecidos."
+        "401":
+          description: Refresh token inválido ou expirado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INVALID_REFRESH_TOKEN"
+                    message: "O refresh token fornecido é inválido ou expirou."
+        default:
+          description: Erro interno do servidor. Tente novamente mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                messages:
+                  - code: "INTERNAL_SERVER_ERROR"
+                    message: "Ocorreu um erro inesperado ao atualizar o token de acesso."

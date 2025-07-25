@@ -1,0 +1,352 @@
+{
+	"info": {
+		"_postman_id": "2f0cec73-7226-42df-ac34-d85ee9d3cf12",
+		"name": "Fiap Tech Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25044275"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Client Credentials Authentication",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"if(!responseData?.accessToken)return;\r",
+									"const accessToken = responseData.accessToken;\r",
+									"pm.environment.set(\"accessToken\", accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"clientId\": \"tech-challenge-client\",\r\n  \"clientSecret\": \"tech-challenge-secret\",\r\n  \"grantType\": \"client_credentials\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/auth/token",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Authentication",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"if(!responseData?.accessToken)return;\r",
+									"const accessToken = responseData.accessToken;\r",
+									"pm.environment.set(\"accessToken\", accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"joao.silva2\",\r\n  \"password\": \"Senha@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/auth/login",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Criar um novo usuário",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"João\",\r\n  \"lastName\": \"Silva\",\r\n  \"email\": \"exemplo@exemplo.com\",\r\n  \"userName\": \"joao.silva\",\r\n  \"password\": \"Senha@123\",\r\n  \"address\": {\r\n    \"street\": \"Rua das Flores\",\r\n    \"addressNumber\": \"123\",\r\n    \"complement\": \"Apto 45\",\r\n    \"city\": \"São Paulo\",\r\n    \"state\": \"SP\",\r\n    \"zipCode\": \"01234-567\",\r\n    \"country\": \"Brasil\",\r\n    \"neighborhood\": \"Centro\",\r\n    \"address\": \"string\"\r\n  },\r\n  \"profile\": \"CUSTOMER\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/users/",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Usuário por Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{defaultUrl}}/users/101",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar um usuário existente",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"Joãoaaa\",\r\n  \"lastName\": \"Silva\",\r\n  \"email\": \"exemplo@exemplo.com\",\r\n  \"userName\": \"joao.silva\",\r\n  \"address\": {\r\n    \"street\": \"Rua das Flores\",\r\n    \"addressNumber\": \"123\",\r\n    \"complement\": \"Apto 45\",\r\n    \"city\": \"São Paulo\",\r\n    \"state\": \"SP\",\r\n    \"zipCode\": \"01234-567\",\r\n    \"country\": \"Brasil\",\r\n    \"neighborhood\": \"Centro\"\r\n  },\r\n  \"profile\": \"CUSTOMER\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/users/101",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar um usuário",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{defaultUrl}}/users/101",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar senha do usuário",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"oldPassword\": \"Senha@123\",\r\n  \"newPassword\": \"Senha@1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/users/102/password",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								"102",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ativar um usuário",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"oldPassword\": \"Senha@123\",\r\n  \"newPassword\": \"Senha@1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{defaultUrl}}/users/102/password",
+							"host": [
+								"{{defaultUrl}}"
+							],
+							"path": [
+								"users",
+								"102",
+								"password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
