@@ -1,6 +1,7 @@
 package com.techchallenge.domain.user.validator;
 
 import com.techchallenge.domain.user.entity.User;
+import com.techchallenge.domain.user.exception.AccessDeniedException;
 import com.techchallenge.domain.user.exception.InvalidPasswordException;
 import com.techchallenge.domain.user.exception.UserAlreadyExistsException;
 import com.techchallenge.domain.user.repository.UserRepository;
@@ -37,7 +38,10 @@ public class UserValidatorImpl implements UserValidator{
     }
 
     @Override
-    public void validatePasswordChange(User user, String oldPassword, String newPassword) {
+    public void validatePasswordChange(User user, String oldPassword, String newPassword, String loggedInUserName) {
+        if (!user.getUserName().equals(loggedInUserName)) {
+            throw new AccessDeniedException("Usuário não autorizado a alterar a senha de outro usuário");
+        }
         if (newPassword == null || newPassword.trim().isEmpty()) {
             throw new InvalidPasswordException("Nova senha não pode ser vazia");
         }

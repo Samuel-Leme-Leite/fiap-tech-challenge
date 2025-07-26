@@ -57,9 +57,9 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void changePassword(Long id, UpdatePasswordRequest updatePasswordRequest) {
+    public void changePassword(Long id, UpdatePasswordRequest updatePasswordRequest, String loggedInUserName) {
         User user = findById(id);
-        userValidator.validatePasswordChange(user, updatePasswordRequest.oldPassword(), updatePasswordRequest.newPassword());
+        userValidator.validatePasswordChange(user, updatePasswordRequest.oldPassword(), updatePasswordRequest.newPassword(), loggedInUserName);
         user.setPassword(passwordEncoder.encode(updatePasswordRequest.newPassword()));
         userRepository.save(user);
     }

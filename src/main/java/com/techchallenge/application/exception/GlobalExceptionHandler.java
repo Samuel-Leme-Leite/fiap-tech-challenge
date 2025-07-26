@@ -2,6 +2,7 @@ package com.techchallenge.application.exception;
 
 import com.techchallenge.application.dto.response.ErrorResponse;
 import com.techchallenge.domain.auth.exception.AuthException;
+import com.techchallenge.domain.user.exception.AccessDeniedException;
 import com.techchallenge.domain.user.exception.InvalidPasswordException;
 import com.techchallenge.domain.user.exception.UserAlreadyExistsException;
 import com.techchallenge.domain.user.exception.UserNotFoundException;
@@ -75,7 +76,15 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(errors));
     }
 
-    // Novos handlers para garantir consistência:
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        ErrorResponse.ErrorMessage errorMessage = new ErrorResponse.ErrorMessage(
+                "ACCESS_DENIED",
+                ex.getMessage()
+        );
+        ErrorResponse errorResponse = new ErrorResponse(List.of(errorMessage));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {

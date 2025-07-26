@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -90,8 +91,8 @@ public class UserController {
             description = "Altera a senha de um usuário existente. O usuário deve ser encontrado pelo ID.")
     @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso")
     @PatchMapping("/{id}/password")
-    public ResponseEntity<Void> changePassword(@PathVariable("id") Long id, @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
-        userService.changePassword(id, updatePasswordRequest);
+    public ResponseEntity<Void> changePassword(@PathVariable("id") Long id, @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, Authentication authentication) {
+        userService.changePassword(id, updatePasswordRequest, authentication.getName());
         return ResponseEntity.ok().build();
     }
 
