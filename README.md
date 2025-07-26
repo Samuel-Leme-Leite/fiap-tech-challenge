@@ -1,10 +1,10 @@
 # Tech Challenge - Sistema de Gestão de Restaurantes
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 Sistema de backend robusto desenvolvido em **Spring Boot** para gerenciamento de usuários de um grupo de restaurantes. Este projeto faz parte da **Fase 1** do Tech Challenge, focando na criação de uma base sólida para futuras expansões.
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 - **Framework:** Spring Boot 3.5.3
 - **Linguagem:** Java 21
@@ -13,7 +13,7 @@ Sistema de backend robusto desenvolvido em **Spring Boot** para gerenciamento de
 - **Arquitetura:** Híbrida (DDD + Clean Architecture)
 - **Documentação:** OpenAPI/Swagger
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Docker
@@ -40,7 +40,7 @@ docker-compose up --build
     - User: `techuser`
     - Password: `techpass`
 
-## 📚 Endpoints da API
+## Endpoints da API
 
 ### Autenticação
 - `POST /auth/login` - Login de usuário
@@ -54,7 +54,7 @@ docker-compose up --build
 - `PATCH /users/{id}/activate` - Ativar usuário (soft delete)
 - `DELETE /users/{id}` - Desativar usuário (soft delete)
 
-## 🧪 Testando a API
+## Testando a API
 
 ### Collection Postman
 Importe a collection `postman_collection.json` (incluída no projeto) para testar todos os endpoints.
@@ -82,7 +82,7 @@ curl -X POST http://localhost:8080/auth/login \
   }'
 ```
 
-## 🏛️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/main/java/com/techchallenge/
@@ -114,7 +114,7 @@ src/main/java/com/techchallenge/
 └── shared/               # Utilitários globais
 ```
 
-## 🔐 Segurança
+## Segurança
 
 - **Autenticação JWT** implementada
 - **Validação robusta** de senhas
@@ -122,7 +122,7 @@ src/main/java/com/techchallenge/
 - **Exception handling** padronizado
 - **Validações de entrada** em todas as camadas
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Spring Boot** (Web, Data JPA, Security, Validation)
 - **PostgreSQL** - Banco de dados relacional
@@ -132,34 +132,34 @@ src/main/java/com/techchallenge/
 - **Docker** - Containerização
 - **Maven** - Gerenciamento de dependências
 
-## 👥 Tipos de Usuário
+## Tipos de Usuário
 
 - **CUSTOMER** - Cliente do restaurante
 - **ADMIN** - Administrador do sistema
 - **EMPLOYEE** - Funcionário (preparado para futuras fases)
 
-## 📊 Funcionalidades Implementadas
+## Funcionalidades Implementadas
 
-### ✅ Gestão de Usuários
+### Gestão de Usuários
 - Cadastro com validações robustas
 - Atualização de dados pessoais
 - Troca de senha segura
 - Soft delete (desativação)
 - Auditoria automática (created_at, updated_at)
 
-### ✅ Autenticação
+### Autenticação
 - Login com username/password
 - Geração de tokens JWT
 - Autenticação de sistemas (client credentials)
 - Proteção de endpoints
 
-### ✅ Validações
+### Validações
 - Senha forte obrigatória
 - Email válido
 - Username único
 - Endereço completo
 
-## 📝 Notas de Desenvolvimento
+## Notas de Desenvolvimento
 
 Este projeto foi desenvolvido seguindo:
 - **SOLID principles**
@@ -169,7 +169,7 @@ Este projeto foi desenvolvido seguindo:
 - **Containerização completa**
 - **Documentação automática**
 
-## 🤝 Contribuição
+## Contribuição
 
 Projeto desenvolvido como parte do Tech Challenge da pós-graduação.
 
